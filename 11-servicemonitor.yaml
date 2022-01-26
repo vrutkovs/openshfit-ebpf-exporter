@@ -6,12 +6,10 @@ metadata:
 spec:
   endpoints:
     - interval: 30s
-      port: "9435"
-      scheme: http
       path: /metrics
+      port: metrics
+      scheme: http
   namespaceSelector:
     matchNames:
       - ebpf-exporter
-  selector:
-    matchLabels:
-      app: ebpf-exporter
+  selector: {}

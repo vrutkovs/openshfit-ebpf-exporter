@@ -7,6 +7,7 @@ spec:
   selector:
     app: ebpf-exporter
   ports:
-    - protocol: TCP
+    - name: metrics
+      protocol: TCP
       port: 9435
-      targetPort: 9435
+      targetPort: metrics

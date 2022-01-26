@@ -42,6 +42,7 @@ spec:
           ports:
             - containerPort: 9435
               protocol: TCP
+              name: metrics
           imagePullPolicy: IfNotPresent
           command:
           - /root/go/bin/ebpf_exporter
