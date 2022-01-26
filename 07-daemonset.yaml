@@ -1,0 +1,97 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: ebpf-exporter
+  namespace: ebpf-exporter
+  labels:
+    app: ebpf-exporter
+spec:
+  selector:
+    matchLabels:
+      app: ebpf-exporter
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ebpf-exporter
+      annotations:
+        alpha.image.policy.openshift.io/resolve-names: '*'
+    spec:
+      restartPolicy: Always
+      serviceAccountName: ebpf-exporter-robot
+      hostPID: true
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      containers:
+        - resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 200m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          name: ebpf-exporter
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+            privileged: true
+            allowPrivilegeEscalation: true
+          ports:
+            - containerPort: 9435
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          command:
+          - /root/go/bin/ebpf_exporter
+          - --config.file=/config/config.yaml
+          volumeMounts:
+            - name: lib-modules
+              mountPath: /lib/modules
+            - name: kernel-src
+              mountPath: /usr/src/kernels
+            - name: kernel-debug
+              mountPath: /sys/kernel/debug
+            - name: config
+              mountPath: /config
+          terminationMessagePolicy: File
+          image: ebpf-exporter:overlay
+      serviceAccount: ebpf-exporter-robot
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+            type: ''
+        - name: sys
+          hostPath:
+            path: /sys
+            type: ''
+        - name: kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
+            type: ''
+        - name: kernel-src
+          hostPath:
+            path: /usr/src/kernels
+            type: ''
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+            type: ''
+        - name: host-dev
+          hostPath:
+            path: /dev
+            type: ''
+        - name: config
+          configMap:
+            name: ebpf-exporter-config
+      dnsPolicy: Default
+      tolerations:
+        - operator: Exists
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+  revisionHistoryLimit: 10

@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ebpf-exporter
+  namespace: openshift-monitoring
+spec:
+  endpoints:
+    - interval: 30s
+      port: "9435"
+      scheme: http
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - ebpf-exporter
+  selector:
+    matchLabels:
+      app: ebpf-exporter

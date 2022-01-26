@@ -1,0 +1,26 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: ebpf-exporter
+  namespace: ebpf-exporter
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'ebpf_exporter:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/cloudflare/ebpf_exporter'
+      ref: master
+  triggers:
+    - type: ConfigChange
+  runPolicy: Serial
